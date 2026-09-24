@@ -1,2 +1,10 @@
 targets/wp-content/
-targets/wp-content/
+reports/output/*.pdf
+data/*.db
+data/*.sqlite3
+__pycache__/
+*.pyc
+.env
+venv/
+node_modules/
+dashboard/build/
