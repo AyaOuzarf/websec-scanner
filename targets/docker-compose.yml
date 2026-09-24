@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Target 1: WordPress (simulates agency CMS)
+  wordpress:
+    image: wordpress:5.8-php7.4   # slightly older = more real vulns to find
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: wp-db
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass123
+      WORDPRESS_DB_NAME: wordpress
+    depends_on:
+      - wp-db
+    networks:
+      - lab-net
+
+  wp-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass123
+      MYSQL_ROOT_PASSWORD: rootpass123
+    networks:
+      - lab-net
+
+  # Target 2: OWASP Juice Shop (simulates custom contact form / client app)
+  juiceshop:
+    image: bkimminich/juice-shop
+    ports:
+      - "3000:3000"
+    networks:
+      - lab-net
+
+  # Target 3: DVWA (extra OWASP Top 10 practice)
+  dvwa:
+    image: vulnerables/web-dvwa
+    ports:
+      - "8081:80"
+    networks:
+      - lab-net
+
+networks:
+  lab-net:
+    driver: bridge
+    internal: false   # keep false so you can browse from host; set true later if you want full isolation
