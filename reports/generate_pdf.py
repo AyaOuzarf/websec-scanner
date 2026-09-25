@@ -7,6 +7,7 @@ client-ready PDF using a Jinja2 HTML template + WeasyPrint.
 import os
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
+from api.models.database import get_db, ScanRecord, User, AuthorizedTarget, Client
 
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
@@ -61,3 +62,5 @@ if __name__ == "__main__":
 
     path = generate_pdf_report(scan_record)
     print(f"PDF generated: {path}")
+    
+    

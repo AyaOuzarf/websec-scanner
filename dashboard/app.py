@@ -73,11 +73,12 @@ if not st.session_state.token:
 # ---------- Sidebar navigation ----------
 st.sidebar.title("🛡️ WebSec Scanner")
 st.sidebar.caption(f"Logged in as **{st.session_state.username}**")
+
 if st.sidebar.button("Log out"):
     logout()
     st.rerun()
 
-page = st.sidebar.radio("Navigate", ["New Scan", "Scan History"])
+page = st.sidebar.radio("Navigate", ["New Scan", "Clients", "Scan History"])
 
 # ---------- Helpers ----------
 def trigger_scan(target_url: str):
@@ -96,12 +97,34 @@ def get_scan(scan_id: str):
     return response.json()
 
 
-def list_scans():
-    response = requests.get(f"{API_BASE_URL}/scan", headers=auth_headers())
+def list_clients():
+    response = requests.get(f"{API_BASE_URL}/clients", headers=auth_headers())
+    response.raise_for_status()
+    return response.json()
+
+def create_client(name: str, contact_email: str, notes: str):
+    response = requests.post(
+        f"{API_BASE_URL}/clients",
+        json={"name": name, "contact_email": contact_email, "notes": notes},
+        headers=auth_headers(),
+    )
+    response.raise_for_status()
+    return response.json()
+
+def add_target(domain: str, client_id: str, notes: str):
+    response = requests.post(
+        f"{API_BASE_URL}/targets",
+        json={"domain": domain, "client_id": client_id, "notes": notes},
+        headers=auth_headers(),
+    )
     response.raise_for_status()
     return response.json()
 
 
+def list_targets():
+    response = requests.get(f"{API_BASE_URL}/targets", headers=auth_headers())
+    response.raise_for_status()
+    return response.json()
 
 def render_report(scan: dict):
     """Render a completed scan's report: score, severity chart, findings table."""
@@ -221,12 +244,18 @@ elif page == "Scan History":
     st.title("Scan History")
 
     scans = list_scans()
+    clients = list_clients()
+    client_lookup = {c["id"]: c["name"] for c in clients}
+
     if not scans:
         st.info("No scans yet — run one from the 'New Scan' page.")
     else:
+        for s in scans:
+            s["client_name"] = client_lookup.get(s.get("client_id"), "—")
+
         df = pd.DataFrame(scans)
         st.dataframe(
-            df[["target", "status", "risk_score", "grade", "total_findings", "created_at"]],
+            df[["target", "client_name", "status", "risk_score", "grade", "total_findings", "created_at"]],
             use_container_width=True,
         )
 
@@ -236,3 +265,64 @@ elif page == "Scan History":
             scan = get_scan(selected_id)
             st.divider()
             render_report(scan)
+            
+                     
+elif page == "Clients":
+    st.title("Client Management")
+
+    tab1, tab2 = st.tabs(["Clients", "Authorized Targets"])
+
+    with tab1:
+        st.subheader("Add a Client")
+        with st.form("add_client_form"):
+            name = st.text_input("Client name")
+            email = st.text_input("Contact email (optional)")
+            notes = st.text_area("Notes (optional)")
+            submitted = st.form_submit_button("Add Client")
+
+        if submitted and name:
+            try:
+                create_client(name, email or None, notes or None)
+                st.success(f"Client '{name}' added.")
+                st.rerun()
+            except requests.exceptions.HTTPError as e:
+                st.error(f"Error: {e.response.text}")
+
+        st.subheader("Existing Clients")
+        clients = list_clients()
+        if clients:
+            df = pd.DataFrame(clients)
+            st.dataframe(df[["name", "contact_email", "notes", "created_at"]], use_container_width=True)
+        else:
+            st.info("No clients yet.")
+
+    with tab2:
+        st.subheader("Add an Authorized Target")
+        clients = list_clients()
+        client_options = {c["name"]: c["id"] for c in clients}
+
+        with st.form("add_target_form"):
+            domain = st.text_input("Domain (e.g. example.com)")
+            client_name = st.selectbox("Client", ["— None —"] + list(client_options.keys()))
+            target_notes = st.text_area("Notes (optional)", key="target_notes")
+            submitted_target = st.form_submit_button("Add Target")
+
+        if submitted_target and domain:
+            client_id = client_options.get(client_name) if client_name != "— None —" else None
+            try:
+                add_target(domain, client_id, target_notes or None)
+                st.success(f"Target '{domain}' authorized.")
+                st.rerun()
+            except requests.exceptions.HTTPError as e:
+                st.error(f"Error: {e.response.text}")
+
+        st.subheader("Authorized Targets")
+        targets = list_targets()
+        if targets:
+            client_lookup = {c["id"]: c["name"] for c in clients}
+            for t in targets:
+                t["client_name"] = client_lookup.get(t.get("client_id"), "—")
+            df = pd.DataFrame(targets)
+            st.dataframe(df[["domain", "client_name", "notes", "created_at"]], use_container_width=True)
+        else:
+            st.info("No authorized targets yet.")

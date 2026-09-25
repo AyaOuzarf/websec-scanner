@@ -41,6 +41,7 @@
 
 <h1>Website Security Assessment Report</h1>
 <div class="header-meta">
+    {% if client_name %}<strong>Client:</strong> {{ client_name }}<br>{% endif %}
     <strong>Target:</strong> {{ target }}<br>
     <strong>Scan Date:</strong> {{ completed_at }}<br>
     <strong>Scan ID:</strong> {{ scan_id }}

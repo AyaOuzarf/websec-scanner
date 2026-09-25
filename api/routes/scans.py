@@ -115,9 +115,15 @@ def download_scan_pdf(scan_id: str, db: Session = Depends(get_db), current_user:
     if record.status != "completed":
         raise HTTPException(status_code=400, detail="Scan is not completed yet")
 
+    client_name = None
+    if record.client_id:
+        client = db.query(Client).filter(Client.id == record.client_id).first()
+        client_name = client.name if client else None
+
     scan_dict = {
         "id": record.id,
         "target": record.target,
+        "client_name": client_name,
         "completed_at": str(record.completed_at),
         "grade": record.grade,
         "risk_score": record.risk_score,
