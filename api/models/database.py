@@ -40,3 +40,13 @@ def get_db():
         yield db
     finally:
         db.close()
+        
+        
+class AuthorizedTarget(Base):
+    __tablename__ = "authorized_targets"
+
+    id = Column(String, primary_key=True)
+    domain = Column(String, nullable=False, unique=True)
+    added_by = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

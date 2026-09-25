@@ -10,6 +10,7 @@ import uuid
 from api.models.database import get_db, ScanRecord
 from api.models.schemas import ScanRequest, ScanSummary, ScanDetail
 from scanner.orchestrator import run_full_scan
+from api.utils.authorization import is_target_authorized
 
 router = APIRouter(prefix="/scan", tags=["scans"])
 
@@ -70,3 +71,23 @@ def get_scan(scan_id: str, db: Session = Depends(get_db)):
 @router.get("", response_model=list[ScanSummary])
 def list_scans(db: Session = Depends(get_db)):
     return db.query(ScanRecord).order_by(ScanRecord.created_at.desc()).all()
+
+
+@router.post("", response_model=ScanSummary)
+def create_scan(scan_request: ScanRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    target_url = str(scan_request.target_url)
+
+    if not is_target_authorized(target_url, db):
+        raise HTTPException(
+            status_code=403,
+            detail=f"Target not authorized. Add it via /targets before scanning."
+        )
+
+    scan_id = str(uuid.uuid4())
+    record = ScanRecord(id=scan_id, target=target_url, status="pending")
+    db.add(record)
+    db.commit()
+    db.refresh(record)
+
+    background_tasks.add_task(_execute_scan, scan_id, target_url, scan_request.checks, None)
+    return record

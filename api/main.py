@@ -8,6 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.models.database import init_db
 from api.routes import scans
 
+from api.routes import scans, targets
+
+
 app = FastAPI(
     title="WebSec Scanner API",
     description="Automated website security assessment platform",
@@ -33,3 +36,7 @@ def on_startup():
 @app.get("/")
 def root():
     return {"status": "ok", "service": "WebSec Scanner API"}
+
+
+app.include_router(scans.router)
+app.include_router(targets.router)
