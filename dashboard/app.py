@@ -21,30 +21,85 @@ SEVERITY_COLORS = {
     "info": "#9ca3af",
 }
 
+# ---------- Session state init ----------
+if "token" not in st.session_state:
+    st.session_state.token = None
+if "username" not in st.session_state:
+    st.session_state.username = None
+
+
+def login(username: str, password: str) -> bool:
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/auth/login",
+            data={"username": username, "password": password},
+        )
+        if response.status_code == 200:
+            st.session_state.token = response.json()["access_token"]
+            st.session_state.username = username
+            return True
+        return False
+    except requests.exceptions.RequestException:
+        return False
+
+
+def logout():
+    st.session_state.token = None
+    st.session_state.username = None
+
+
+def auth_headers() -> dict:
+    return {"Authorization": f"Bearer {st.session_state.token}"}
+
+
+# ---------- Login gate ----------
+if not st.session_state.token:
+    st.title("🛡️ WebSec Scanner — Login")
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Log in")
+
+    if submitted:
+        if login(username, password):
+            st.rerun()
+        else:
+            st.error("Invalid username or password")
+
+    st.stop()  # halts execution here — nothing below runs until logged in
+    
 
 # ---------- Sidebar navigation ----------
+# ---------- Sidebar navigation ----------
 st.sidebar.title("🛡️ WebSec Scanner")
-page = st.sidebar.radio("Navigate", ["New Scan", "Scan History"])
+st.sidebar.caption(f"Logged in as **{st.session_state.username}**")
+if st.sidebar.button("Log out"):
+    logout()
+    st.rerun()
 
+page = st.sidebar.radio("Navigate", ["New Scan", "Scan History"])
 
 # ---------- Helpers ----------
 def trigger_scan(target_url: str):
-    response = requests.post(f"{API_BASE_URL}/scan", json={"target_url": target_url})
+    response = requests.post(
+        f"{API_BASE_URL}/scan",
+        json={"target_url": target_url},
+        headers=auth_headers(),
+    )
     response.raise_for_status()
     return response.json()
 
 
 def get_scan(scan_id: str):
-    response = requests.get(f"{API_BASE_URL}/scan/{scan_id}")
+    response = requests.get(f"{API_BASE_URL}/scan/{scan_id}", headers=auth_headers())
     response.raise_for_status()
     return response.json()
 
 
 def list_scans():
-    response = requests.get(f"{API_BASE_URL}/scan")
+    response = requests.get(f"{API_BASE_URL}/scan", headers=auth_headers())
     response.raise_for_status()
     return response.json()
-
 
 def render_report(scan: dict):
     """Render a completed scan's report: score, severity chart, findings table."""
@@ -108,9 +163,18 @@ if page == "New Scan":
     confirm = st.checkbox("I confirm I am authorized to scan this target")
 
     if st.button("Start Scan", type="primary", disabled=not (target_url and confirm)):
-        with st.spinner("Launching scan..."):
-            scan = trigger_scan(target_url)
-            scan_id = scan["id"]
+        try:
+            with st.spinner("Launching scan..."):
+                scan = trigger_scan(target_url)
+                scan_id = scan["id"]
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 401:
+                st.error("Session expired — please log out and log back in.")
+            elif e.response.status_code == 403:
+                st.error("Target not authorized. Add it to authorized targets first.")
+            else:
+                st.error(f"Error: {e.response.text}")
+            st.stop()
 
         st.success(f"Scan started — ID: `{scan_id}`")
 
@@ -134,8 +198,6 @@ if page == "New Scan":
             st.error(f"Scan ended with status: {status}")
             if scan.get("report"):
                 st.json(scan["report"])
-
-
 # ---------- Page: Scan History ----------
 elif page == "Scan History":
     st.title("Scan History")
