@@ -1,0 +1,519 @@
+{
+  "scan_id": "97a8ecdf-ebc1-4572-8581-8c763aadff37",
+  "target": "http://localhost:8080",
+  "started_at": "2026-09-24T17:38:32.343509+00:00",
+  "completed_at": "2026-09-24T17:41:09.530999+00:00",
+  "checks_run": [
+    "http_security_headers",
+    "ssl_tls",
+    "nuclei_scan"
+  ],
+  "risk_summary": {
+    "risk_score": 38,
+    "grade": "C",
+    "severity_breakdown": {
+      "critical": 0,
+      "high": 2,
+      "medium": 2,
+      "low": 3,
+      "info": 19
+    },
+    "total_findings": 26
+  },
+  "findings": [
+    {
+      "finding": "Missing 'Strict-Transport-Security' header",
+      "severity": "high",
+      "tool": "custom-header-check",
+      "recommendation": "Add 'Strict-Transport-Security: max-age=31536000; includeSubDomains' to force HTTPS."
+    },
+    {
+      "finding": "Missing 'Content-Security-Policy' header",
+      "severity": "high",
+      "tool": "custom-header-check",
+      "recommendation": "Add a Content-Security-Policy header to mitigate XSS and data injection attacks."
+    },
+    {
+      "finding": "Missing 'X-Frame-Options' header",
+      "severity": "medium",
+      "tool": "custom-header-check",
+      "recommendation": "Add 'X-Frame-Options: DENY' or 'SAMEORIGIN' to prevent clickjacking."
+    },
+    {
+      "finding": "Missing 'X-Content-Type-Options' header",
+      "severity": "medium",
+      "tool": "custom-header-check",
+      "recommendation": "Add 'X-Content-Type-Options: nosniff' to prevent MIME-sniffing attacks."
+    },
+    {
+      "finding": "Missing 'Referrer-Policy' header",
+      "severity": "low",
+      "tool": "custom-header-check",
+      "recommendation": "Add a Referrer-Policy header to control referrer information leakage."
+    },
+    {
+      "finding": "Missing 'Permissions-Policy' header",
+      "severity": "low",
+      "tool": "custom-header-check",
+      "recommendation": "Add a Permissions-Policy header to restrict browser feature access."
+    },
+    {
+      "finding": "'Server' header exposes technology info: Apache/2.4.62 (Debian)",
+      "severity": "low",
+      "tool": "custom-header-check",
+      "recommendation": "Remove or mask the 'Server' header to reduce information disclosure."
+    },
+    {
+      "finding": "Cookies without Secure attribute - Detect",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "cookies-without-secure",
+      "matched_at": "localhost:8080",
+      "recommendation": "Ensure that all cookies are set with the Secure attribute to prevent MITM attacks.\n",
+      "reference": [
+        "https://owasp.org/www-community/controls/SecureCookieAttribute"
+      ]
+    },
+    {
+      "finding": "WAF Detection",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "waf-detect",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": [
+        "https://github.com/Ekultek/WhatWaf"
+      ]
+    },
+    {
+      "finding": "RPC Portmapper (UDP) - Detect",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "rpc-udp-detect",
+      "matched_at": "localhost:111",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": [
+        "https://github.com/CiscoCXSecurity/udp-proto-scanner",
+        "https://www.rfc-editor.org/rfc/rfc1833",
+        "https://nmap.org/nsedoc/scripts/rpcinfo.html",
+        "https://book.hacktricks.xyz/pentesting/pentesting-rpcbind"
+      ]
+    },
+    {
+      "finding": "Missing Cookie SameSite Strict",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "missing-cookie-samesite-strict",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": [
+        "https://pulsesecurity.co.nz/articles/samesite-lax-csrf"
+      ]
+    },
+    {
+      "finding": "FingerprintHub Technology Fingerprint",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "fingerprinthub-web-fingerprints",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": [
+        "https://github.com/0x727/FingerprintHub"
+      ]
+    },
+    {
+      "finding": "FingerprintHub Technology Fingerprint",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "fingerprinthub-web-fingerprints",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": [
+        "https://github.com/0x727/FingerprintHub"
+      ]
+    },
+    {
+      "finding": "GLPI Panel - Detect",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "glpi-project_glpi",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": [
+        "https://glpi-project.org/",
+        "https://www.exploit-db.com/ghdb/7002"
+      ]
+    },
+    {
+      "finding": "Apache Detection",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "apache-detect",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "Form Detection",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "form-detection",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": [
+        "https://github.com/dirtycoder0124/formcrawler"
+      ]
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    },
+    {
+      "finding": "HTTP Missing Security Headers",
+      "severity": "info",
+      "tool": "nuclei",
+      "template_id": "http-missing-security-headers",
+      "matched_at": "http://localhost:8080",
+      "recommendation": "Review the matched template details and apply the relevant fix.",
+      "reference": []
+    }
+  ],
+  "check_details": {
+    "ssl_tls": {
+      "check": "ssl_tls",
+      "target": "http://localhost:8080",
+      "status": "error",
+      "error": "'NoneType' object has no attribute 'certificate_info'",
+      "findings": []
+    },
+    "http_security_headers": {
+      "check": "http_security_headers",
+      "target": "http://localhost:8080",
+      "status": "completed",
+      "status_code": 200,
+      "findings": [
+        {
+          "finding": "Missing 'Strict-Transport-Security' header",
+          "severity": "high",
+          "tool": "custom-header-check",
+          "recommendation": "Add 'Strict-Transport-Security: max-age=31536000; includeSubDomains' to force HTTPS."
+        },
+        {
+          "finding": "Missing 'Content-Security-Policy' header",
+          "severity": "high",
+          "tool": "custom-header-check",
+          "recommendation": "Add a Content-Security-Policy header to mitigate XSS and data injection attacks."
+        },
+        {
+          "finding": "Missing 'X-Frame-Options' header",
+          "severity": "medium",
+          "tool": "custom-header-check",
+          "recommendation": "Add 'X-Frame-Options: DENY' or 'SAMEORIGIN' to prevent clickjacking."
+        },
+        {
+          "finding": "Missing 'X-Content-Type-Options' header",
+          "severity": "medium",
+          "tool": "custom-header-check",
+          "recommendation": "Add 'X-Content-Type-Options: nosniff' to prevent MIME-sniffing attacks."
+        },
+        {
+          "finding": "Missing 'Referrer-Policy' header",
+          "severity": "low",
+          "tool": "custom-header-check",
+          "recommendation": "Add a Referrer-Policy header to control referrer information leakage."
+        },
+        {
+          "finding": "Missing 'Permissions-Policy' header",
+          "severity": "low",
+          "tool": "custom-header-check",
+          "recommendation": "Add a Permissions-Policy header to restrict browser feature access."
+        },
+        {
+          "finding": "'Server' header exposes technology info: Apache/2.4.62 (Debian)",
+          "severity": "low",
+          "tool": "custom-header-check",
+          "recommendation": "Remove or mask the 'Server' header to reduce information disclosure."
+        }
+      ],
+      "findings_count": 7,
+      "timestamp": "2026-09-24T17:38:32.379313+00:00"
+    },
+    "nuclei_scan": {
+      "check": "nuclei_scan",
+      "target": "http://localhost:8080",
+      "status": "completed",
+      "findings": [
+        {
+          "finding": "Cookies without Secure attribute - Detect",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "cookies-without-secure",
+          "matched_at": "localhost:8080",
+          "recommendation": "Ensure that all cookies are set with the Secure attribute to prevent MITM attacks.\n",
+          "reference": [
+            "https://owasp.org/www-community/controls/SecureCookieAttribute"
+          ]
+        },
+        {
+          "finding": "WAF Detection",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "waf-detect",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": [
+            "https://github.com/Ekultek/WhatWaf"
+          ]
+        },
+        {
+          "finding": "RPC Portmapper (UDP) - Detect",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "rpc-udp-detect",
+          "matched_at": "localhost:111",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": [
+            "https://github.com/CiscoCXSecurity/udp-proto-scanner",
+            "https://www.rfc-editor.org/rfc/rfc1833",
+            "https://nmap.org/nsedoc/scripts/rpcinfo.html",
+            "https://book.hacktricks.xyz/pentesting/pentesting-rpcbind"
+          ]
+        },
+        {
+          "finding": "Missing Cookie SameSite Strict",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "missing-cookie-samesite-strict",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": [
+            "https://pulsesecurity.co.nz/articles/samesite-lax-csrf"
+          ]
+        },
+        {
+          "finding": "FingerprintHub Technology Fingerprint",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "fingerprinthub-web-fingerprints",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": [
+            "https://github.com/0x727/FingerprintHub"
+          ]
+        },
+        {
+          "finding": "FingerprintHub Technology Fingerprint",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "fingerprinthub-web-fingerprints",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": [
+            "https://github.com/0x727/FingerprintHub"
+          ]
+        },
+        {
+          "finding": "GLPI Panel - Detect",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "glpi-project_glpi",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": [
+            "https://glpi-project.org/",
+            "https://www.exploit-db.com/ghdb/7002"
+          ]
+        },
+        {
+          "finding": "Apache Detection",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "apache-detect",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "Form Detection",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "form-detection",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": [
+            "https://github.com/dirtycoder0124/formcrawler"
+          ]
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        },
+        {
+          "finding": "HTTP Missing Security Headers",
+          "severity": "info",
+          "tool": "nuclei",
+          "template_id": "http-missing-security-headers",
+          "matched_at": "http://localhost:8080",
+          "recommendation": "Review the matched template details and apply the relevant fix.",
+          "reference": []
+        }
+      ],
+      "findings_count": 19,
+      "timestamp": "2026-09-24T17:41:09.530241+00:00"
+    }
+  }
+}
