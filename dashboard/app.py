@@ -101,6 +101,8 @@ def list_scans():
     response.raise_for_status()
     return response.json()
 
+
+
 def render_report(scan: dict):
     """Render a completed scan's report: score, severity chart, findings table."""
     risk_score = scan.get("risk_score")
@@ -111,6 +113,22 @@ def render_report(scan: dict):
     col1.metric("Risk Score", f"{risk_score}/100" if risk_score is not None else "—")
     col2.metric("Grade", grade or "—")
     col3.metric("Total Findings", total_findings if total_findings is not None else "—")
+
+    # PDF download button (only offered once the scan is fully completed)
+    if scan.get("status") == "completed":
+        pdf_response = requests.get(
+            f"{API_BASE_URL}/scan/{scan['id']}/pdf",
+            headers=auth_headers(),
+        )
+        if pdf_response.status_code == 200:
+            st.download_button(
+                "📄 Download PDF Report",
+                data=pdf_response.content,
+                file_name=f"security_report_{scan['id']}.pdf",
+                mime="application/pdf",
+            )
+        else:
+            st.caption("PDF report unavailable.")
 
     report = scan.get("report")
     if not report:
@@ -152,8 +170,8 @@ def render_report(scan: dict):
                 st.write(f"**Matched at:** {row.get('matched_at')}")
             if row.get("reference"):
                 st.write(f"**References:** {row.get('reference')}")
-
-
+                
+                
 # ---------- Page: New Scan ----------
 if page == "New Scan":
     st.title("Run a New Security Scan")
