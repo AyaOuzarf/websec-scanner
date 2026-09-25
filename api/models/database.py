@@ -17,16 +17,16 @@ Base = declarative_base()
 class ScanRecord(Base):
     __tablename__ = "scans"
 
-    id = Column(String, primary_key=True)  # scan_id (uuid)
+    id = Column(String, primary_key=True)
     target = Column(String, nullable=False)
-    status = Column(String, default="pending")  # pending | running | completed | error
+    client_id = Column(String, nullable=True)   # NEW
+    status = Column(String, default="pending")
     risk_score = Column(Integer, nullable=True)
     grade = Column(String, nullable=True)
     total_findings = Column(Integer, nullable=True)
-    report = Column(JSON, nullable=True)  # full report JSON
+    report = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     completed_at = Column(DateTime, nullable=True)
-
 
 def init_db():
     import os
@@ -47,6 +47,27 @@ class AuthorizedTarget(Base):
 
     id = Column(String, primary_key=True)
     domain = Column(String, nullable=False, unique=True)
+    client_id = Column(String, nullable=True)   # NEW — links to Client.id
     added_by = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True)
+    username = Column(String, nullable=False, unique=True)
+    hashed_password = Column(String, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    
+class Client(Base):
+    __tablename__ = "clients"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    contact_email = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

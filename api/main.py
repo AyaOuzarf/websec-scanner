@@ -9,6 +9,8 @@ from api.models.database import init_db
 from api.routes import scans
 
 from api.routes import scans, targets
+from api.routes import scans, targets, auth
+from api.routes import scans, targets, auth, clients
 
 
 app = FastAPI(
@@ -40,3 +42,5 @@ def root():
 
 app.include_router(scans.router)
 app.include_router(targets.router)
+app.include_router(auth.router)
+app.include_router(clients.router)

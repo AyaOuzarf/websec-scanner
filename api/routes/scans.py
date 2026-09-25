@@ -18,6 +18,7 @@ from api.models.database import User
 from fastapi.responses import FileResponse
 from reports.generate_pdf import generate_pdf_report
 
+from api.models.database import get_db, ScanRecord, User, AuthorizedTarget
 
 router = APIRouter(prefix="/scan", tags=["scans"])
 
@@ -53,19 +54,24 @@ def _execute_scan(scan_id: str, target_url: str, checks: list, db_session_factor
 
 @router.post("", response_model=ScanSummary)
 def create_scan(scan_request: ScanRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    scan_id = str(uuid.uuid4())
     target_url = str(scan_request.target_url)
 
-    record = ScanRecord(id=scan_id, target=target_url, status="pending")
+    if not is_target_authorized(target_url, db):
+        raise HTTPException(status_code=403, detail="Target not authorized. Add it via /targets before scanning.")
+
+    from urllib.parse import urlparse
+    hostname = urlparse(target_url).hostname
+    authorized_record = db.query(AuthorizedTarget).filter(AuthorizedTarget.domain == hostname).first()
+    client_id = authorized_record.client_id if authorized_record else None
+
+    scan_id = str(uuid.uuid4())
+    record = ScanRecord(id=scan_id, target=target_url, client_id=client_id, status="pending")
     db.add(record)
     db.commit()
     db.refresh(record)
 
-    # Runs after the response is returned — non-blocking
     background_tasks.add_task(_execute_scan, scan_id, target_url, scan_request.checks, None)
-
     return record
-
 
 @router.get("/{scan_id}", response_model=ScanDetail)
 def get_scan(scan_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
