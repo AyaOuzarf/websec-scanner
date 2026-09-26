@@ -14,8 +14,8 @@ def is_target_authorized(target_url: str, db: Session) -> bool:
         return False
 
     # Allow localhost/local lab targets automatically (dev/testing convenience)
-    if hostname in ("localhost", "127.0.0.1"):
+    if hostname in ("localhost", "127.0.0.1", "host.docker.internal"):
         return True
-
+    
     record = db.query(AuthorizedTarget).filter(AuthorizedTarget.domain == hostname).first()
     return record is not None

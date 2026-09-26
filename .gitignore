@@ -7,4 +7,4 @@ __pycache__/
 .env
 venv/
 node_modules/
-dashboard/build/
+dashboard/build/.env

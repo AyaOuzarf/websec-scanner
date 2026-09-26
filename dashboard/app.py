@@ -8,8 +8,11 @@ import requests
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import os
 
-API_BASE_URL = "http://localhost:8001"
+
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8001")
+
 
 st.set_page_config(page_title="WebSec Scanner", page_icon="🛡️", layout="wide")
 
@@ -97,10 +100,17 @@ def get_scan(scan_id: str):
     return response.json()
 
 
+def list_scans():
+    response = requests.get(f"{API_BASE_URL}/scan", headers=auth_headers())
+    response.raise_for_status()
+    return response.json()
+
+
 def list_clients():
     response = requests.get(f"{API_BASE_URL}/clients", headers=auth_headers())
     response.raise_for_status()
     return response.json()
+
 
 def create_client(name: str, contact_email: str, notes: str):
     response = requests.post(
@@ -110,6 +120,7 @@ def create_client(name: str, contact_email: str, notes: str):
     )
     response.raise_for_status()
     return response.json()
+
 
 def add_target(domain: str, client_id: str, notes: str):
     response = requests.post(
@@ -126,8 +137,10 @@ def list_targets():
     response.raise_for_status()
     return response.json()
 
+
+
 def render_report(scan: dict):
-    """Render a completed scan's report: score, severity chart, findings table."""
+    """Render a completed scan's report: score, severity chart, findings grouped by OWASP category."""
     risk_score = scan.get("risk_score")
     grade = scan.get("grade")
     total_findings = scan.get("total_findings")
@@ -163,8 +176,9 @@ def render_report(scan: dict):
         st.success("No findings — clean scan!")
         return
 
-    # Severity breakdown chart
     df = pd.DataFrame(findings)
+
+    # Severity breakdown chart — overall picture
     severity_counts = df["severity"].value_counts().reset_index()
     severity_counts.columns = ["severity", "count"]
 
@@ -178,23 +192,33 @@ def render_report(scan: dict):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Findings table, sorted by severity priority
+    # Findings grouped by OWASP Top 10 category — clearer than a flat table or separate chart
     severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
-    df["_sort"] = df["severity"].map(severity_order)
-    df = df.sort_values("_sort").drop(columns="_sort")
+    severity_icons = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🔵", "info": "⚪"}
 
-    st.subheader("Findings Detail")
-    for _, row in df.iterrows():
-        severity = row.get("severity", "info")
-        with st.expander(f"[{severity.upper()}] {row.get('finding', 'Unknown finding')}"):
-            st.write(f"**Tool:** {row.get('tool', 'N/A')}")
-            st.write(f"**Recommendation:** {row.get('recommendation', 'N/A')}")
-            if row.get("matched_at"):
-                st.write(f"**Matched at:** {row.get('matched_at')}")
-            if row.get("reference"):
-                st.write(f"**References:** {row.get('reference')}")
-                
-                
+    st.subheader("Findings by OWASP Top 10 Category")
+
+    if "owasp_category" not in df.columns:
+        st.info("OWASP mapping not available for this scan (run a new scan to see categories).")
+        return
+
+    df["_sort"] = df["severity"].map(severity_order)
+
+    for owasp_cat, group in df.groupby("owasp_category"):
+        group = group.sort_values("_sort")
+        with st.container(border=True):
+            st.markdown(f"**{owasp_cat}** — {len(group)} finding(s)")
+            for _, row in group.iterrows():
+                icon = severity_icons.get(row.get("severity", "info"), "⚪")
+                with st.expander(f"{icon} [{row.get('severity', 'info').upper()}] {row.get('finding', 'Unknown finding')}"):
+                    st.write(f"**Tool:** {row.get('tool', 'N/A')}")
+                    st.write(f"**Recommendation:** {row.get('recommendation', 'N/A')}")
+                    if row.get("matched_at"):
+                        st.write(f"**Matched at:** {row.get('matched_at')}")
+                    if row.get("reference"):
+                        st.write(f"**References:** {row.get('reference')}")
+                        
+                                   
 # ---------- Page: New Scan ----------
 if page == "New Scan":
     st.title("Run a New Security Scan")

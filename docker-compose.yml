@@ -1,0 +1,33 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./data:/app/data
+      - ./reports/output:/app/reports/output
+    environment:
+      - WEBSEC_SECRET_KEY=${WEBSEC_SECRET_KEY:-dev-secret-change-this-before-any-real-deployment}
+    networks:
+      - websec-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/dashboard.Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://api:8001
+    depends_on:
+      - api
+    networks:
+      - websec-net
+
+networks:
+  websec-net:
+    driver: bridge
